@@ -91,7 +91,7 @@ h2 { margin: 0 0 10px; font-size: 1.2rem; color: var(--brown); }
 .icon-btn:hover { background: #ffe0bd; }
 
 /* ===== 1️⃣ 질문 고르기 ===== */
-.qbtns { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.qbtns { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
 .qbtn {
   position: relative; border: 2px solid #f3c99a; background: #fffaf3; border-radius: 14px;
   padding: 8px 4px; text-align: center; color: var(--ink); min-width: 0;
@@ -140,6 +140,7 @@ h2 { margin: 0 0 10px; font-size: 1.2rem; color: var(--brown); }
 .tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
 .tag { font-size: .75rem; padding: 2px 8px; border-radius: 999px; background: #fff; border: 1px solid #ecd2b4; }
 .tag.book { background: #e3f0ff; border-color: #a8c8f0; }
+.tag.pair { background: #dff0ff; border-color: #6aa6e8; font-weight: 800; }
 .tag.rec { background: #fff6c4; border-color: #f0d870; }
 .pic {
   position: relative; width: 100%; aspect-ratio: 4 / 3; background: #fff; border-radius: 12px;
@@ -211,7 +212,7 @@ h2 { margin: 0 0 10px; font-size: 1.2rem; color: var(--brown); }
   .tab .long { display: none; }
   .tab .short { display: inline; }
   .tab { font-size: .92rem; padding: 8px 4px; }
-  .qbtns { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }
+  .qbtns { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
   .qbtn { padding: 16px 2px 6px; }
   .qbtn .emo { font-size: 1.3rem; }
   .qbtn .k { font-size: .78rem; }

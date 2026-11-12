@@ -6,8 +6,8 @@
 (function () {
   "use strict";
   const $ = (s, el = document) => el.querySelector(s);
-  const LS_PLANS = "itsinbox.plans.v1";
-  const LS_STATS = "itsinbox.stats.v1";
+  const LS_PLANS = "itsinbox.plans.v2";
+  const LS_STATS = "itsinbox.stats.v2";
   const LEVEL_KO = { basic: "초급", mid: "중급" };
 
   /* ---------- 저장 ---------- */
@@ -20,7 +20,8 @@
   let plans = load(LS_PLANS, {});
   let stats = load(LS_STATS, {});
   const recordings = {}; // qid -> blob URL (새로고침하면 사라짐)
-  let currentQ = "q1";
+  let currentQ = QUESTIONS[0].id;
+  const TOTAL = QUESTIONS.length;
   const filters = { basic: "all", mid: "all" };
 
   const placeById = id => PLACES.find(p => p.id === id);
@@ -174,7 +175,7 @@
           <button class="btn" data-act="next">다음 질문 ▶</button>
           <button class="btn" data-act="go">🎤 연습하기로 가기</button>
         </div>
-        <p class="status" id="status-${level}">${pl ? `✅ Q${QUESTIONS.indexOf(q) + 1} 대답 완성! 연습하기에 담겼어요. (${planCount()}/5)` : `👇 아래 카드에서 ${q.ko}${josa(q.ko)} 어디 있는지 골라 보세요.`}</p>
+        <p class="status" id="status-${level}">${pl ? `✅ Q${QUESTIONS.indexOf(q) + 1} 대답 완성! 연습하기에 담겼어요. (${planCount()}/${TOTAL})` : `👇 아래 카드에서 ${q.ko}${josa(q.ko)} 어디 있는지 골라 보세요.`}</p>
       </div>
       <div class="box">
         <h2>2️⃣ 어디 있는지 골라요 <small>(${lv})</small></h2>
@@ -197,7 +198,7 @@
     const q = qById(currentQ);
     let list = PLACES;
     if (f === "book") list = PLACES.filter(p => p.book);
-    else if (f === "rec") list = PLACES.filter(p => p.when.includes(currentQ));
+    else if (f === "rec") list = PLACES.filter(p => p.when.includes(currentQ)).sort((a, b) => (b.id === q.pair) - (a.id === q.pair));
     else if (f !== "all") list = PLACES.filter(p => p.cat === f);
     if (!list.length) { grid.innerHTML = `<p class="empty">카드가 없어요.</p>`; return; }
     const cur = plans[currentQ];
@@ -206,8 +207,9 @@
       const c = catById(p.cat);
       const picked = cur && cur.id === p.id && cur.level === level;
       const rec = p.when.includes(currentQ);
+      const pair = q.pair === p.id;
       return `<article class="card ${picked ? "picked" : ""}" data-cat="${p.cat}" data-id="${p.id}">
-        <div class="tags"><span class="tag">${c.emoji} ${c.ko}</span>${p.book ? `<span class="tag book">📘 교과서</span>` : ""}${rec ? `<span class="tag rec">⭐ 추천</span>` : ""}</div>
+        <div class="tags"><span class="tag">${c.emoji} ${c.ko}</span>${p.book ? `<span class="tag book">📘 교과서</span>` : ""}${pair ? `<span class="tag pair">📘 교과서 대화</span>` : ""}${rec ? `<span class="tag rec">⭐ 추천</span>` : ""}</div>
         <div class="pic">${picHtml(p, q.emoji)}</div>
         <div class="sent">${wordsHtml(s.en)}</div>
         <div class="k">${esc(s.ko)}</div>
@@ -260,18 +262,18 @@
       delete plans[currentQ];
       save(LS_PLANS, plans);
       updateBadge(); renderLevel(level);
-      $("#status-" + level).textContent = `↩️ Q${QUESTIONS.indexOf(q) + 1} 대답을 뺐어요. (${planCount()}/5)`;
+      $("#status-" + level).textContent = `↩️ Q${QUESTIONS.indexOf(q) + 1} 대답을 뺐어요. (${planCount()}/${TOTAL})`;
       return;
     }
     plans[currentQ] = { id, level };
     save(LS_PLANS, plans);
     updateBadge(); renderLevel(level);
     const pl = planOf(currentQ);
-    $("#status-" + level).textContent = `✅ 대답 완성! 연습하기에 담았어요. (${planCount()}/5)`;
+    $("#status-" + level).textContent = `✅ 대답 완성! 연습하기에 담았어요. (${planCount()}/${TOTAL})`;
     speakQueue([q.q, pl.en]);
   }
 
-  function updateBadge() { $("#planBadge").textContent = `${planCount()}/5`; }
+  function updateBadge() { $("#planBadge").textContent = `${planCount()}/${TOTAL}`; }
 
   /* ---------- 연습하기 ---------- */
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -287,7 +289,7 @@
       n += s.n; sum += s.sum; if (s.n > 0) practiced++;
     });
     const avg = n ? Math.round(sum / n) : 0;
-    $("#sumStats").innerHTML = `🎙️ 총 연습 <span id="sumN">${n}</span>회 · 📊 평균 정확도 <span id="sumAvg">${n ? avg + "%" : "-"}</span> · ✅ 연습한 문장 <span id="sumDone">${practiced}</span>/5`;
+    $("#sumStats").innerHTML = `🎙️ 총 연습 <span id="sumN">${n}</span>회 · 📊 평균 정확도 <span id="sumAvg">${n ? avg + "%" : "-"}</span> · ✅ 연습한 문장 <span id="sumDone">${practiced}</span>/${TOTAL}`;
     const note = $("#micNote");
     if (!SR && !canRec) note.textContent = "⚠️ 이 브라우저는 말하기 연습을 지원하지 않아요. Chrome 권장.";
     else if (!SR) note.textContent = "ℹ️ 이 브라우저는 음성 인식이 없어 4초 녹음만 돼요. 채점은 Chrome 권장.";

@@ -6,7 +6,7 @@ let fail = 0;
 const ok = (c, m) => { console.log((c ? "✅ " : "❌ ") + m); if (!c) fail++; };
 
 const FAKE_SR = `
-  window.__fakeSay = [["it's on the bed"]];
+  window.__fakeSay = [["it's on the sofa"]];
   class FakeSR {
     constructor(){ this.lang=""; this.interimResults=false; this.maxAlternatives=1; }
     start(){
@@ -49,7 +49,7 @@ const FAKE_SR = `
 
   // 필터
   await page.click('#panel-basic .chip-f[data-f="book"]');
-  ok(await page.locator("#grid-basic .card").count() === 7, "📘 교과서 필터 7개");
+  ok(await page.locator("#grid-basic .card").count() === 9, "📘 교과서 필터 9개");
   await page.click('#panel-basic .chip-f[data-f="park"]');
   ok(await page.locator("#grid-basic .card").count() === 12, "종류(공원) 필터 12개");
   await page.click('#panel-basic .chip-f[data-f="rec"]');
@@ -58,24 +58,29 @@ const FAKE_SR = `
   await page.click('#panel-basic .chip-f[data-f="all"]');
 
   // Q1 카드 선택 (초급)
-  await page.click('#grid-basic [data-pick="on_bed"]');
-  ok((await page.textContent("#panel-basic .line.me .s")).includes("It's on the bed."), "말풍선 빈칸 채움");
-  ok((await page.textContent("#planBadge")).trim() === "1/5", "배지 1/5");
+  await page.click('#grid-basic [data-pick="on_sofa"]');
+  ok((await page.textContent("#panel-basic .line.me .s")).includes("It's on the sofa."), "말풍선 빈칸 채움");
+  ok((await page.textContent("#planBadge")).trim() === "1/6", "배지 1/6");
   ok(await page.locator("#panel-basic .qbtn.active .done").count() === 1, "질문 버튼 ✓");
+  ok(await page.locator("#panel-basic .qbtn").count() === 6, "질문 6개");
+  ok(await page.locator('#grid-basic .card[data-id="on_sofa"] .tag.pair').count() === 1, "📘 교과서 대화 태그 (book–on the sofa)");
+  await page.click('#panel-basic .chip-f[data-f="rec"]');
+  ok(await page.locator("#grid-basic .card").first().getAttribute("data-id") === "on_sofa", "⭐ 필터 맨 앞 = 교과서 짝");
+  await page.click('#panel-basic .chip-f[data-f="all"]');
 
   // 다음 질문 → Q2, 중급 탭에서 고르기 (공유)
   await page.click('#panel-basic [data-act="next"]');
   await page.click('.tab[data-tab="mid"]');
-  ok(await page.locator("#panel-mid .qbtn.active").getAttribute("data-q") === "q2", "중급 탭도 Q2");
-  await page.click('#grid-mid [data-pick="under_table"]');
-  ok((await page.textContent("#panel-mid .line.me .s")).includes("It's under the table in the kitchen."), "중급 대답");
-  ok((await page.textContent("#planBadge")).trim() === "2/5", "배지 2/5 (초급·중급 공유)");
+  ok(await page.locator("#panel-mid .qbtn.active").getAttribute("data-q") === "pencilcase", "중급 탭도 Q2");
+  await page.click('#grid-mid [data-pick="in_bag"]');
+  ok((await page.textContent("#panel-mid .line.me .s")).includes("It's in the bag in my room."), "중급 대답");
+  ok((await page.textContent("#planBadge")).trim() === "2/6", "배지 2/6 (초급·중급 공유)");
   // 다른 카드 → 교체
   await page.click('#grid-mid [data-pick="in_box"]');
-  ok((await page.textContent("#planBadge")).trim() === "2/5", "같은 질문은 1개만 (교체)");
+  ok((await page.textContent("#planBadge")).trim() === "2/6", "같은 질문은 1개만 (교체)");
   // 다시 누르면 빠짐
   await page.click('#grid-mid [data-pick="in_box"]');
-  ok((await page.textContent("#planBadge")).trim() === "1/5", "다시 누르면 빠짐");
+  ok((await page.textContent("#planBadge")).trim() === "1/6", "다시 누르면 빠짐");
   await page.click('#grid-mid [data-pick="in_box"]');
 
   // 단어 뜻 풍선
@@ -90,7 +95,7 @@ const FAKE_SR = `
   ok((await page.textContent("#planRows")).includes("활동 카드에서 골라요"), "빈 줄 안내");
 
   // 말하기 (정확)
-  const row1 = page.locator('#planRows .prow[data-q="q1"]');
+  const row1 = page.locator('#planRows .prow[data-q="book"]');
   await row1.locator('[data-act="rec"]').click();
   await row1.locator(".result .big").waitFor({ timeout: 8000 });
   ok((await row1.locator(".result .big").textContent()).includes("100%"), "정확 → 100%");
@@ -99,11 +104,11 @@ const FAKE_SR = `
   await row1.locator('[data-act="play"]').click();
 
   // 틀리게 말하기
-  await page.evaluate(() => { window.__fakeSay = [["it's in the bad", "it's on the bed"]]; });
+  await page.evaluate(() => { window.__fakeSay = [["it's in the sofa", "it's on the sofa"]]; });
   await row1.locator('[data-act="rec"]').click();
   await page.waitForTimeout(1500);
   ok((await row1.locator(".result .big").textContent()).includes("100%"), "후보 5개 중 최고 점수");
-  await page.evaluate(() => { window.__fakeSay = [["it's in the bad"]]; });
+  await page.evaluate(() => { window.__fakeSay = [["it's in the sofa"]]; });
   await row1.locator('[data-act="rec"]').click();
   await page.waitForTimeout(1500);
   const txt = await row1.locator(".result").textContent();
@@ -111,7 +116,7 @@ const FAKE_SR = `
   ok(await row1.locator(".wc.miss").count() >= 1, "🟥 칩");
   ok((await row1.locator(".rec-stats").textContent()).includes("3회"), "횟수 3회");
   const sum = await page.textContent("#sumStats");
-  ok(sum.includes("총 연습 3회") && sum.includes("1/5"), "요약: " + sum);
+  ok(sum.includes("총 연습 3회") && sum.includes("1/6"), "요약: " + sum);
   await page.screenshot({ path: OUT + "/desktop-practice.png", fullPage: true });
 
   // 새로고침해도 기록 유지
@@ -119,8 +124,8 @@ const FAKE_SR = `
   ok((await page.textContent("#sumStats")).includes("총 연습 3회"), "localStorage 기록 유지");
 
   // ✕ 빼기
-  await page.click('#planRows .prow[data-q="q2"] [data-act="remove"]');
-  ok((await page.textContent("#planBadge")).trim() === "1/5", "✕ 빼기");
+  await page.click('#planRows .prow[data-q="pencilcase"] [data-act="remove"]');
+  ok((await page.textContent("#planBadge")).trim() === "1/6", "✕ 빼기");
 
   // 기록 지우기
   await page.click("#btnClear");
