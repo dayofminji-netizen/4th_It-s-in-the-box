@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>It's in the box! · 4학년 10단원</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/moonspam/NanumSquareRound@1.0/nanumsquareround.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="leaves" aria-hidden="true"></div>
+    <h1><span class="en">📦 It's in the box!</span></h1>
+    <p class="sub">
+      <span class="en">Where is my ___?</span> → <span class="en">It's ___ the ___.</span>
+      <span class="ko-sub">천재(김) 4학년 10단원 · 물건이 어디 있는지 묻고 답해요</span>
+    </p>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab active" role="tab" data-tab="basic" aria-selected="true">
+      <span class="long">🎨 활동 카드 (초급)</span><span class="short">초급 카드</span>
+    </button>
+    <button class="tab" role="tab" data-tab="mid" aria-selected="false">
+      <span class="long">🎨 활동 카드 (중급)</span><span class="short">중급 카드</span>
+    </button>
+    <button class="tab" role="tab" data-tab="practice" aria-selected="false">
+      <span class="long">🎤 연습하기</span><span class="short">연습하기</span>
+      <span class="badge" id="planBadge">0/5</span>
+    </button>
+  </nav>
+
+  <main>
+    <section class="panel active" id="panel-basic" data-level="basic"></section>
+    <section class="panel" id="panel-mid" data-level="mid"></section>
+
+    <section class="panel" id="panel-practice">
+      <div class="summary box no-print">
+        <div class="stats" id="sumStats"></div>
+        <div class="sum-btns">
+          <button class="btn" id="btnClear">🧹 기록 지우기</button>
+          <button class="btn" id="btnAll">🔊 전체 듣기</button>
+          <button class="btn" id="btnPrint">🖨️ 인쇄하기</button>
+        </div>
+        <p class="mic-note" id="micNote"></p>
+      </div>
+
+      <div class="box plan">
+        <h2>📅 나의 계획표 · <span class="en">My Plans</span></h2>
+        <p class="print-only print-sub en">Where is my ___? — It's ___ the ___.</p>
+        <div id="planRows"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="popup" class="popup hidden" role="dialog"></div>
+  <div id="toast" class="toast hidden" aria-live="polite"></div>
+
+  <script src="data.js"></script>
+  <script src="score.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
